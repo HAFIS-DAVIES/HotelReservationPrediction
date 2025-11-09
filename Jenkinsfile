@@ -5,13 +5,15 @@ pipeline {
         VENV_DIR = 'venv'
         GCP_PROJECT = "llmops-476223"
         GCLOUD_PATH = "/var/jenkins_home/google-cloud-sdk/bin"
+        IMAGE_NAME = "ml-project"
+        REGION = "us-central1"
     }
 
     stages {
-        stage('Cloning Github repo to Jenkins') {
+        stage('Cloning GitHub Repo') {
             steps {
                 script {
-                    echo 'Cloning Github repo to Jenkins............'
+                    echo '📦 Cloning repository...'
                     checkout scmGit(
                         branches: [[name: '*/main']],
                         extensions: [],
@@ -24,10 +26,10 @@ pipeline {
             }
         }
 
-        stage('Setting up our Virtual Environment and Installing dependencies') {
+        stage('Set up Virtual Environment & Dependencies') {
             steps {
                 script {
-                    echo 'Setting up our Virtual Environment and Installing dependencies............'
+                    echo '⚙️ Setting up Python environment...'
                     sh '''
                         python3 -m venv ${VENV_DIR}
                         . ${VENV_DIR}/bin/activate
@@ -38,38 +40,43 @@ pipeline {
             }
         }
 
-        stage('Building and Pushing Docker Image to GCR') {
+        stage('Build & Push Docker Image to GCR') {
             steps {
                 withCredentials([file(credentialsId: 'gcp-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     script {
-                        echo 'Building and Pushing Docker Image to GCR.............'
+                        echo '🐳 Building and pushing Docker image...'
                         sh '''
                             export PATH=$PATH:${GCLOUD_PATH}
                             gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
                             gcloud config set project ${GCP_PROJECT}
                             gcloud auth configure-docker gcr.io --quiet
-                            docker build -t gcr.io/${GCP_PROJECT}/ml-project:latest .
-                            docker push gcr.io/${GCP_PROJECT}/ml-project:latest
+
+                            docker build -t gcr.io/${GCP_PROJECT}/${IMAGE_NAME}:latest .
+                            docker push gcr.io/${GCP_PROJECT}/${IMAGE_NAME}:latest
                         '''
                     }
                 }
             }
         }
 
-        stage('Deploy to Google Cloud Run') {
+        stage('Deploy to Cloud Run') {
             steps {
                 withCredentials([file(credentialsId: 'gcp-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     script {
-                        echo 'Deploying to Google Cloud Run.............'
+                        echo '🚀 Deploying to Cloud Run...'
                         sh '''
                             export PATH=$PATH:${GCLOUD_PATH}
                             gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
                             gcloud config set project ${GCP_PROJECT}
-                            gcloud run deploy ml-project \
-                                --image=gcr.io/${GCP_PROJECT}/ml-project:latest \
-                                --platform=managed \
-                                --region=us-central1 \
-                                --allow-unauthenticated
+
+                            gcloud run deploy ${IMAGE_NAME} \
+                                --image gcr.io/${GCP_PROJECT}/${IMAGE_NAME}:latest \
+                                --platform managed \
+                                --region ${REGION} \
+                                --allow-unauthenticated \
+                                --port 8080 \
+                                --memory 512Mi \
+                                --timeout 600s
                         '''
                     }
                 }
@@ -78,6 +85,12 @@ pipeline {
     }
 
     post {
+        success {
+            echo '✅ Deployment completed successfully!'
+        }
+        failure {
+            echo '❌ Deployment failed. Check Jenkins logs or Cloud Run logs for details.'
+        }
         always {
             echo 'Pipeline execution completed.'
         }
