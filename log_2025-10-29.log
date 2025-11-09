@@ -1,0 +1,17 @@
+2025-10-29 13:27:52,190 - INFO - YAML file 'config/config.yaml' read successfully.
+2025-10-29 13:27:52,191 - INFO - DataIngestion started with bucket: mlops-hotelbucket, file: Hotel_Reservations.csv  and train ratio: 0.8 
+2025-10-29 13:29:56,808 - INFO - YAML file 'config/config.yaml' read successfully.
+2025-10-29 13:29:56,808 - INFO - DataIngestion started with bucket: mlops-hotelbucket, file: Hotel_Reservations.csv  and train ratio: 0.8 
+2025-10-29 13:29:56,808 - INFO - Running data ingestion process
+2025-10-29 13:29:57,698 - INFO - Downloaded raw file: Hotel_Reservations.csv from GCS bucket: mlops-hotelbucket to artifacts/data_ingestion/raw_data\Hotel_Reservations.csv
+2025-10-29 13:29:57,705 - INFO - Starting data split into train and test sets
+2025-10-29 13:29:57,854 - ERROR - Error during data splitting
+2025-10-29 13:29:57,854 - INFO - Data ingestion process finished
+2025-10-29 13:32:49,882 - INFO - YAML file 'config/config.yaml' read successfully.
+2025-10-29 13:32:49,883 - INFO - DataIngestion started with bucket: mlops-hotelbucket, file: Hotel_Reservations.csv, and train ratio: 0.8
+2025-10-29 13:32:49,883 - INFO - Running data ingestion process
+2025-10-29 13:32:50,704 - INFO - Downloaded raw file: Hotel_Reservations.csv from GCS bucket: mlops-hotelbucket to artifacts/data_ingestion/raw_data\Hotel_Reservations.csv
+2025-10-29 13:32:50,704 - INFO - Starting data split into train and test sets
+2025-10-29 13:32:51,452 - INFO - Data split completed. Train data saved to artifacts/data_ingestion/raw_data\train.csv, Test data saved to artifacts/data_ingestion/raw_data\test.csv
+2025-10-29 13:32:51,461 - INFO - Data ingestion process completed successfully
+2025-10-29 13:32:51,461 - INFO - Data ingestion process finished
