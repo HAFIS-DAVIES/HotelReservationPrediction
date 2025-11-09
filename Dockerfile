@@ -1,31 +1,32 @@
 # Use a lightweight Python image
-FROM python:slim
+FROM python:3.10-slim
 
-# Set environment variables to prevent Python from writing .pyc files & Ensure Python output is not buffered
+# Environment vars for reliability
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# Set the working directory
+# Working directory
 WORKDIR /app
 
-# Install system dependencies required by LightGBM
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
     libgomp1 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the application code
+# Copy project files
 COPY . .
 
-# Install the package in editable mode
-RUN pip install --no-cache-dir -e .
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Train the model before running the application
-RUN python pipeline/training_pipeline.py
+# (Optional) Copy pre-trained model if local
+COPY ./artifacts/models/lgbm_model.pkl /app/models/model.pkl
 
-# Expose the port that Flask will run on
+# Expose Flask port
 ENV PORT=8080
 EXPOSE 8080
 
-# Command to run the app
+# Start Flask app
 CMD ["python", "application.py"]
